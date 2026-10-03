@@ -1,9 +1,14 @@
 name: release
 
-# A `v*` tag typechecks, tests, packs and attaches the tarball to a GitHub
-# Release. There is no registry, exactly like clerk-client: consumers install
-# the release asset URL and their package-lock pins its integrity hash, so no
+# A `v*` tag builds, proves and attaches the tarball to a GitHub Release.
+# There is no registry, exactly like clerk-client: consumers install the
+# release asset URL and their package-lock pins its integrity hash, so no
 # token and no git are needed at install time.
+#
+# Two jobs, because the build runs code nobody here wrote: npm ci, the tests,
+# and the consumer probe's unlocked `npm install` of eslint and friends. All
+# of that happens with a read-only token that is not even left in
+# .git/config. The job that can write runs no npm at all.
 on:
   push:
     tags: ["v*"]
@@ -12,16 +17,19 @@ permissions:
   contents: read
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
-    # The only place in this repository with write access, on the one job that
-    # needs it — never at workflow level.
     permissions:
-      contents: write
+      contents: read
+    outputs:
+      file: ${{ steps.pack.outputs.file }}
     steps:
-      # Pinned to a full commit SHA: this is the one job holding
-      # `contents: write`.
+      # Third-party actions are pinned to a full commit SHA, not a tag: a tag
+      # is a movable pointer in someone else's repository. The comment records
+      # which release the SHA was, so a bump is a visible diff.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -41,6 +49,8 @@ jobs:
 
       - run: npm run typecheck
 
+      - run: npm run lint
+
       - run: npm test
 
       - name: Pack
@@ -55,12 +65,57 @@ jobs:
           TARBALL: ${{ steps.pack.outputs.file }}
         run: bash scripts/check-consumer.sh "$TARBALL"
 
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tarball
+          path: ${{ steps.pack.outputs.file }}
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    # The only place in this repository with write access, on a job that
+    # runs nothing but git, tar and gh.
+    permissions:
+      contents: write
+    steps:
+      # Full history, so the tagged commit can be checked against main.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Refuse a tag whose commit is not on main
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME ($GITHUB_SHA) is not on main"
+            exit 1
+          fi
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: tarball
+
+      - name: Refuse a tarball that is not exactly the five expected files
+        env:
+          TARBALL: ${{ needs.build.outputs.file }}
+        run: |
+          expected=$(printf '%s\n' package/LICENSE package/README.md package/index.js \
+                       package/package.json package/react.js | sort)
+          actual=$(tar -tzf "$TARBALL" | sort)
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::$TARBALL does not carry exactly the five expected files"
+            diff <(echo "$expected") <(echo "$actual") || true
+            exit 1
+          fi
+
       - name: Publish the release with the tarball attached
         env:
           GH_TOKEN: ${{ github.token }}
           # Through the environment, never interpolated into the script body:
           # a `${{ }}` expression is pasted into the shell before it runs.
-          TARBALL: ${{ steps.pack.outputs.file }}
+          TARBALL: ${{ needs.build.outputs.file }}
         run: |
           gh release create "$GITHUB_REF_NAME" "$TARBALL" \
             --repo "$GITHUB_REPOSITORY" \
