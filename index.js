@@ -89,7 +89,7 @@ export function base(options) {
     {
       name: "@v-m-pioneer-trading/linter-options",
       linterOptions: {
-        // ESLint 9 defaults to "warn"; "error" says the same thing as
+        // ESLint defaults to "warn"; "error" says the same thing as
         // `--max-warnings 0` without relying on the script carrying it.
         reportUnusedDisableDirectives: "error",
       },
