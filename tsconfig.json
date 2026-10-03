@@ -1,0 +1,17 @@
+{
+  // Typechecks the package's own JavaScript through its JSDoc. The fixtures
+  // under test/fixtures/ have their own tsconfigs and are deliberately bad.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["index.js", "react.js", "test/*.js"]
+}

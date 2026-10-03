@@ -1,0 +1,56 @@
+name: ci
+
+on:
+  # No branch filter: a pull request stacked on another branch needs the same
+  # checks as one targeting main.
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only for the whole workflow. The release workflow is the only place
+# `contents: write` appears, scoped to one job there.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Third-party actions are pinned to a full commit SHA, not a tag: a tag
+      # is a movable pointer in someone else's repository. The comment records
+      # which release the SHA was, so a bump is a visible diff.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      # --ignore-scripts: no dependency gets to run code at install time, the
+      # same way every consumer installs this package.
+      - run: npm ci --ignore-scripts
+
+      - run: npm run typecheck
+
+      # Lints test/fixtures/ with the real configs and asserts which rule
+      # fires where, so a preset or rule lost upstream fails here.
+      - run: npm test
+
+      - name: Pack and check the tarball's contents
+        run: |
+          npm pack --silent > /dev/null
+          tarball=$(ls ./*.tgz)
+          tar -tzf "$tarball" | sort > packed.txt
+          cat packed.txt
+          expected=$(printf '%s\n' package/LICENSE package/README.md package/index.js \
+                       package/package.json package/react.js | sort)
+          if [ "$(cat packed.txt)" != "$expected" ]; then
+            echo "::error::the tarball does not carry exactly index.js, react.js and the metadata files"
+            diff <(echo "$expected") packed.txt || true
+            exit 1
+          fi
+
+      # The packed tarball, installed like a service installs it, linting with
+      # the README's own eslint.config.mjs snippets.
+      - name: Lint a scratch consumer with the tarball and the README snippets
+        run: bash scripts/check-consumer.sh ./*.tgz

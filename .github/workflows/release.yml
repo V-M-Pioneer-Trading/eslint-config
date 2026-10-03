@@ -1,0 +1,68 @@
+name: release
+
+# A `v*` tag typechecks, tests, packs and attaches the tarball to a GitHub
+# Release. There is no registry, exactly like clerk-client: consumers install
+# the release asset URL and their package-lock pins its integrity hash, so no
+# token and no git are needed at install time.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # The only place in this repository with write access, on the one job that
+    # needs it — never at workflow level.
+    permissions:
+      contents: write
+    steps:
+      # Pinned to a full commit SHA: this is the one job holding
+      # `contents: write`.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Refuse a tag that disagrees with package.json
+        run: |
+          tagged="${GITHUB_REF_NAME#v}"
+          declared=$(node -p "require('./package.json').version")
+          if [ "$tagged" != "$declared" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $declared"
+            exit 1
+          fi
+
+      - run: npm ci --ignore-scripts
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - name: Pack
+        id: pack
+        run: |
+          file=$(npm pack --silent | tail -n 1)
+          echo "file=$file" >> "$GITHUB_OUTPUT"
+          tar -tzf "$file"
+
+      - name: Prove the tarball in a scratch consumer
+        env:
+          TARBALL: ${{ steps.pack.outputs.file }}
+        run: bash scripts/check-consumer.sh "$TARBALL"
+
+      - name: Publish the release with the tarball attached
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Through the environment, never interpolated into the script body:
+          # a `${{ }}` expression is pasted into the shell before it runs.
+          TARBALL: ${{ steps.pack.outputs.file }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$TARBALL" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes
