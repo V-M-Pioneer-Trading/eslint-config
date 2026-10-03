@@ -123,6 +123,12 @@ void describe("base", () => {
     assert.ok(rulesIn(await linted, "src/inline-config.ts").includes("@eslint-community/eslint-comments/no-use"));
   });
 
+  void it("KNOWN GAP: an inline config that turns no-use off passes", async () => {
+    // Pinned, not endorsed: see the fixture and the README. Visible in
+    // review, not enforced by lint.
+    assert.deepEqual(rulesIn(await linted, "src/self-disabling-inline-config.ts"), []);
+  });
+
   void it("refuses an eslint-disable that names no rule", async () => {
     assert.ok(
       rulesIn(await linted, "src/unlimited-disable.ts").includes("@eslint-community/eslint-comments/no-unlimited-disable"),
@@ -174,6 +180,7 @@ void describe("base", () => {
       "src/described-disable.ts",
       "src/floating.ts",
       "src/inline-config.ts",
+      "src/self-disabling-inline-config.ts",
       "src/strict-only.ts",
       "src/stylistic.ts",
       "src/type-import.ts",

@@ -18,5 +18,7 @@ TypeScript `>=5.7.0 <6.1.0` (both ends tested in CI).
   eslint-plugin-react-refresh `vite`. TypeScript only: command-interface is
   converted before it adopts this.
 - Release: a read-only `build` job and a `publish` job that runs no npm,
-  refuses a tag not on `main` and a tarball that is not the five expected
-  files.
+  refuses a tag not on `main`, and takes the tarball by the tag's name only
+  if it holds exactly the five files, each byte-identical to the tag.
+- Known gap, documented and pinned by a test: an inline config that also
+  turns `no-use` off passes lint. The README has an optional CI grep.

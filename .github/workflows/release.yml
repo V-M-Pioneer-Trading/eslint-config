@@ -21,8 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    outputs:
-      file: ${{ steps.pack.outputs.file }}
     steps:
       # Third-party actions are pinned to a full commit SHA, not a tag: a tag
       # is a movable pointer in someone else's repository. The comment records
@@ -97,27 +95,41 @@ jobs:
         with:
           name: tarball
 
-      - name: Refuse a tarball that is not exactly the five expected files
-        env:
-          TARBALL: ${{ needs.build.outputs.file }}
+      # The name comes from the tag, not from the build job: `publish` takes
+      # nothing on trust from a job that ran npm. The tarball must hold exactly
+      # the five files, each byte-identical to the tagged commit (npm pack
+      # copies them verbatim, package.json included). git, tar and cmp only.
+      - name: Refuse a tarball that is not the tagged source, byte for byte
         run: |
+          tarball="v-m-pioneer-trading-eslint-config-${GITHUB_REF_NAME#v}.tgz"
+          if [ ! -f "$tarball" ]; then
+            echo "::error::the build artifact holds no $tarball"
+            ls -la
+            exit 1
+          fi
           expected=$(printf '%s\n' package/LICENSE package/README.md package/index.js \
                        package/package.json package/react.js | sort)
-          actual=$(tar -tzf "$TARBALL" | sort)
+          actual=$(tar -tzf "$tarball" | sort)
           if [ "$actual" != "$expected" ]; then
-            echo "::error::$TARBALL does not carry exactly the five expected files"
+            echo "::error::$tarball does not carry exactly the five expected files"
             diff <(echo "$expected") <(echo "$actual") || true
             exit 1
           fi
+          unpacked=$(mktemp -d)
+          tar -xzf "$tarball" -C "$unpacked"
+          for file in LICENSE README.md index.js package.json react.js; do
+            cmp "$unpacked/package/$file" "$file" || {
+              echo "::error::package/$file in $tarball differs from $file at $GITHUB_REF_NAME"
+              exit 1
+            }
+          done
+          echo "tarball=$tarball" >> "$GITHUB_ENV"
 
       - name: Publish the release with the tarball attached
         env:
           GH_TOKEN: ${{ github.token }}
-          # Through the environment, never interpolated into the script body:
-          # a `${{ }}` expression is pasted into the shell before it runs.
-          TARBALL: ${{ needs.build.outputs.file }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "$TARBALL" \
+          gh release create "$GITHUB_REF_NAME" "$tarball" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$GITHUB_REF_NAME" \
             --generate-notes

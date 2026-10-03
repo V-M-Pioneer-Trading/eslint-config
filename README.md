@@ -61,10 +61,12 @@ export default react({
 });
 ```
 
-`vite.config.ts` is a `.ts` file, so it is linted with type information and
-must be in a tsconfig (the usual `tsconfig.node.json` referenced from the root
-`tsconfig.json`, or the root one's `include`). Otherwise ESLint reports it as
-not found by the project service.
+If the Vite config is `vite.config.ts`, it is a `.ts` file, so it is linted
+with type information and must be in a tsconfig (the usual
+`tsconfig.node.json` referenced from the root `tsconfig.json`, or the root
+one's `include`); otherwise ESLint reports it as not found by the project
+service. command-interface keeps `vite.config.js`, which is JavaScript outside
+`files` and so gets the rules without type information.
 
 ### Options
 
@@ -81,16 +83,23 @@ changes a rule.
 `.mjs`, `.cjs` and `.jsx` file, in both variants. Every one of them gets every
 rule set below. JavaScript that is not in `files` (`eslint.config.mjs`,
 `jest.config.js`, `scripts/*.js`) is usually in no tsconfig, so it gets
-typescript-eslint's `disableTypeChecked`: the same rules minus the 63 that need
-type information, and no project service.
+typescript-eslint's `disableTypeChecked`: the same rules minus the type-aware
+rules, and no project service.
 
 **CommonJS scripts are named `.cjs`.** `no-require-imports` (strict) reports
-every `require()`. In a `.cjs` file it is off and the file is parsed as
-CommonJS, because the extension already says how it imports. So a script
-written with `require()` is renamed, not disabled: fleet-service
-`scripts/write-openapi.js` becomes `scripts/write-openapi.cjs`, and the same
-for agent-service `ts/scripts/*.js` (update the `package.json` scripts that
-call them).
+every `require()`, except in a `.cjs` file, whose extension already says it
+imports that way. So a script written with `require()` is renamed, not
+disabled:
+
+- fleet-service: `scripts/write-openapi.js` becomes `.cjs`; update the
+  `openapi` script in `package.json`.
+- agent-service `ts/`: the four scripts that use `require()`
+  (`check-dependencies.js`, `codegen.js`, `run-contract.js`,
+  `write-openapi.js`) become `.cjs`. Update every caller: the `package.json`
+  scripts, `.github/workflows/ts.yml` and `CLAUDE.md` (both name
+  `run-contract.js`). `src/__tests__/dependencies.test.ts` and
+  `src/__tests__/runContract.test.ts` call `require()` from TypeScript, which
+  the rule reports too: they switch to `import`.
 
 ### Ignored everywhere
 
@@ -114,9 +123,9 @@ be linted.
 | `consistent-type-imports` | typescript-eslint, `error` — a type-only import is `import type`. Added here: neither preset has it, and meta#105 counted on it | everything linted |
 | eslint-comments `recommended` | [@eslint-community/eslint-plugin-eslint-comments][comments]: `disable-enable-pair`, `no-aggregating-enable`, `no-duplicate-disable`, `no-unlimited-disable`, `no-unused-enable` | everything linted |
 | `require-description` | same plugin, `error` — every directive says why after ` -- ` | everything linted |
-| `no-use` | same plugin, `error`, allowing only `eslint-disable`, `eslint-disable-line`, `eslint-disable-next-line` and `eslint-enable`. A file-wide `/* eslint rule: "off" */`, `/* global */` or `/* eslint-env */` would reconfigure the shared rule set, so it is refused | everything linted |
+| `no-use` | same plugin, `error`, allowing only `eslint-disable`, `eslint-disable-line`, `eslint-disable-next-line` and `eslint-enable`. A file-wide `/* eslint rule: "off" */`, `/* global */` or `/* eslint-env */` would reconfigure the shared rule set, so it is refused (with one gap, below) | everything linted |
 | unused directives and inline configs | ESLint `linterOptions.reportUnusedDisableDirectives` and `reportUnusedInlineConfigs`, both `"error"` | everything linted |
-| CommonJS | `no-require-imports` off and `sourceType: "commonjs"` | `.cjs` only |
+| CommonJS | `no-require-imports` off | `.cjs` only |
 | react-hooks `recommended` | [eslint-plugin-react-hooks][hooks] 7: `rules-of-hooks`, `exhaustive-deps`, and the React Compiler checks (`purity`, `refs`, `immutability`, `set-state-in-effect`, `set-state-in-render`, `static-components`, `use-memo`, `preserve-manual-memoization`, `globals`, `error-boundaries`, `incompatible-library`, `unsupported-syntax`, `config`, `gating`) | React variant only |
 | react-refresh `vite` | [eslint-plugin-react-refresh][refresh]: `only-export-components` with `allowConstantExport` | React variant, `.jsx`/`.tsx` |
 
@@ -129,6 +138,26 @@ There are no baseline files.
 ```ts
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length checked on the line above
 const first = values[0]!;
+```
+
+**Known gap: `no-use` can switch itself off.** One inline config that names
+`no-use` too passes lint and overrides rules for the whole file:
+
+```ts
+/* eslint @eslint-community/eslint-comments/no-use: "off", @typescript-eslint/no-explicit-any: "off" -- reason */
+```
+
+The comment turns `no-use` off for the file, its own report included. This is
+**visible in review but not enforced** by lint. A test pins the current
+behaviour, so a fix upstream shows up as a failing test here. A consumer that
+wants it enforced can add this step to CI after `npm run lint`:
+
+```sh
+# Refuse any /* eslint ... */ inline config (only eslint-disable/-enable directives are allowed).
+if git grep -nE '^[[:space:]]*/\*[[:space:]]*eslint[[:space:]]' -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs'; then
+  echo "::error::inline ESLint config found; use a described eslint-disable instead"
+  exit 1
+fi
 ```
 
 ## Dependencies
@@ -149,17 +178,27 @@ presets come from the consumer's own caret `typescript-eslint` peer (its
 minors add fixes and rule options, though preset membership only changes in a
 major), and react-hooks' own dependencies (`@babel/*`, `hermes-parser`) are
 caret ranges. Each consumer's lockfile is what fixes those; a fresh lockfile
-can resolve newer ones. The cost is that every consumer's lockfile carries the React plugins,
-and react-hooks 7 brings `@babel/core`, `hermes-parser` and `zod` with it. All
-of it is dev-only, from registry.npmjs.org, with sha512 integrity, and none of
-it has an install script that `npm ci --ignore-scripts` would need.
+can resolve newer ones.
+
+Every consumer's lockfile carries the React plugins, and react-hooks 7 brings
+`@babel/core`, `hermes-parser` and `zod` with it. All of it is dev-only, from
+registry.npmjs.org, with sha512 integrity, and none of it has an install
+script that `npm ci --ignore-scripts` would need.
 
 **Consumers with a dependency allowlist** (agent-service `ts/`, auth-service
 after its port) add three names to `[devDependencies]`:
 `@v-m-pioneer-trading/eslint-config`, `eslint`, `typescript-eslint`. The
 transitive plugins are not direct dependencies and do not appear in
-`package.json`. A checker that admits only the clerk-client release URL must
-also admit this repository's release URL.
+`package.json`. agent-service's `ts/scripts/check-dependencies.js` was written
+for exactly one tarball, clerk-client's, in `dependencies`. Three of its checks
+must learn about this one, which lives in **`devDependencies`**:
+
+- the spec check, which requires a plain semver range for everything except
+  the clerk-client URL;
+- the resolved-origin check, which admits only registry.npmjs.org and the
+  clerk-client release;
+- the `registry.npmjs.org/<name>/-/` check, which a release URL can never
+  satisfy.
 
 ## Bumping a repository
 
@@ -190,6 +229,7 @@ reported in `.js`, and in the React variant `rules-of-hooks`,
 nothing for a constant beside a component). It also asserts the exact list of
 files linted, so each shared ignore and the `ignores` option are tested by
 absence, that a negated ignore throws, and that a clean file reports nothing.
+One test pins a known gap instead (the self-disabling inline config above).
 Any fatal message (a parse error, a file the project service refuses) fails
 whichever test is reading it.
 
@@ -214,9 +254,18 @@ something new, patch otherwise), merge, push a matching tag (`git tag v1.1.0 && 
 v1.1.0`). The release workflow refuses a tag that disagrees with
 `package.json`, then a read-only `build` job typechecks, tests, packs, proves the tarball in a
 scratch consumer and uploads it as an artifact. A separate `publish` job,
-the only one with `contents: write`, runs no npm at all: it checks the tagged
-commit is on `main` and the tarball holds exactly the five expected files,
+the only one with `contents: write`, runs no npm at all. It checks the tagged
+commit is on `main`, takes the tarball by the name the tag implies
+(`v-m-pioneer-trading-eslint-config-<version>.tgz`), requires exactly the five
+expected files in it, each byte-identical (`cmp`) to the tagged checkout, and
 then attaches it to a GitHub Release.
+
+**Re-running a release.** The tarball artifact is kept for one day: within
+it, re-running just the failed `publish` job reuses it; after it, re-run all
+jobs so `build` makes a new one from the tag. If `gh release create` made the release but the upload failed, a re-run fails
+because the release already exists: delete it by hand first (`gh release
+delete vX.Y.Z --repo V-M-Pioneer-Trading/eslint-config`; the tag stays), then
+re-run the workflow.
 
 ## Licence
 

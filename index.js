@@ -138,7 +138,6 @@ export function base(options) {
       // A script written with `require()` is renamed to `.cjs`.
       name: "@v-m-pioneer-trading/commonjs",
       files: ["**/*.cjs"],
-      languageOptions: { sourceType: "commonjs" },
       rules: { "@typescript-eslint/no-require-imports": "off" },
     },
     comments.recommended,
