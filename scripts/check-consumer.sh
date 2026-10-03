@@ -8,6 +8,13 @@
 #   scripts/check-consumer.sh path/to/package.tgz
 set -euo pipefail
 
+# setup-node registers ESLint problem matchers, which would turn the failures
+# this probe provokes on purpose into error annotations on a green run.
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
+  echo "::remove-matcher owner=eslint-stylish::"
+  echo "::remove-matcher owner=eslint-compact::"
+fi
+
 tarball=$(readlink -f "$1")
 readme=$(readlink -f "$(dirname "$0")/../README.md")
 work=$(mktemp -d)
