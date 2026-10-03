@@ -38,16 +38,18 @@ export const DEFAULT_IGNORES = [
  * @property {string[]} [files] Globs linted WITH type information. Default
  *   {@link TYPESCRIPT_FILES}. Every file matched must be in a tsconfig.
  * @property {string[]} [ignores] Extra paths never linted, added to
- *   {@link DEFAULT_IGNORES} (which cannot be removed).
+ *   {@link DEFAULT_IGNORES}. A negated (`!`) pattern is refused: it would
+ *   bring a shared ignore back.
  */
 
 /**
- * @param {Options} options
+ * @param {unknown} options What a JavaScript caller really passed, which
+ *   may be nothing at all.
  * @returns {Required<Options>}
  */
 function resolve(options) {
   const { tsconfigRootDir, files = TYPESCRIPT_FILES, ignores = [] } =
-    /** @type {Partial<Options>} */ (options ?? {});
+    /** @type {Partial<Options>} */ (typeof options === "object" && options !== null ? options : {});
   if (typeof tsconfigRootDir !== "string" || tsconfigRootDir === "") {
     throw new TypeError(
       "@v-m-pioneer-trading/eslint-config: pass { tsconfigRootDir: import.meta.dirname }",
@@ -62,6 +64,12 @@ function resolve(options) {
         `@v-m-pioneer-trading/eslint-config: \`${name}\` must be an array of glob strings`,
       );
     }
+  }
+  const negated = ignores.find((g) => g.startsWith("!"));
+  if (negated !== undefined) {
+    throw new TypeError(
+      `@v-m-pioneer-trading/eslint-config: \`ignores\` only adds paths; "${negated}" would un-ignore a shared one`,
+    );
   }
   if (files.length === 0) {
     throw new TypeError("@v-m-pioneer-trading/eslint-config: `files` must not be empty");
@@ -92,6 +100,9 @@ export function base(options) {
         // ESLint defaults to "warn"; "error" says the same thing as
         // `--max-warnings 0` without relying on the script carrying it.
         reportUnusedDisableDirectives: "error",
+        // Belt and braces with `no-use` below, which refuses inline config
+        // outright: one that changes nothing is reported by ESLint itself.
+        reportUnusedInlineConfigs: "error",
       },
     },
     // Rule presets apply to every file ESLint lints. `files` scopes only
@@ -122,6 +133,13 @@ export function base(options) {
       files: JAVASCRIPT_FILES,
       ignores: files,
     },
+    {
+      // A `.cjs` file is CommonJS by name, so `require()` is its import.
+      // A script written with `require()` is renamed to `.cjs`.
+      name: "@v-m-pioneer-trading/commonjs",
+      files: ["**/*.cjs"],
+      rules: { "@typescript-eslint/no-require-imports": "off" },
+    },
     comments.recommended,
     {
       name: "@v-m-pioneer-trading/eslint-comments",
@@ -129,6 +147,20 @@ export function base(options) {
         // An `eslint-disable` must say why after ` -- `. Applies to enable,
         // disable, disable-line and disable-next-line alike.
         "@eslint-community/eslint-comments/require-description": "error",
+        // The only directives allowed are the four that suppress a report,
+        // each with its reason. `/* eslint rule: off */`, `/* global */` and
+        // the rest would reconfigure the shared rule set for a whole file.
+        "@eslint-community/eslint-comments/no-use": [
+          "error",
+          {
+            allow: [
+              "eslint-disable",
+              "eslint-disable-line",
+              "eslint-disable-next-line",
+              "eslint-enable",
+            ],
+          },
+        ],
       },
     },
   ]);

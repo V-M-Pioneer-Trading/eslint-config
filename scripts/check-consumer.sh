@@ -104,3 +104,26 @@ TS
 lint_expect 1 "a conditional hook fails the React variant"
 grep -q 'react-hooks/rules-of-hooks' lint.out || {
   echo "::error::the failure was not rules-of-hooks"; exit 1; }
+
+# The fixed hook, a component and a vendored script the README's `ignores`
+# names: the React variant must pass all of it.
+cat > src/useThing.ts <<'TS'
+declare function useState<T>(initial: T): [T, (next: T) => void];
+export function useThing(): number {
+  const [n] = useState(0);
+  return n;
+}
+TS
+cat > src/Panel.tsx <<'TSX'
+import { useThing } from "./useThing";
+
+export const LIMIT = 3;
+
+export function Panel(): unknown {
+  const n = useThing();
+  return <p>{Math.min(n, LIMIT)}</p>;
+}
+TSX
+mkdir -p lcars-reference-files/assets
+echo 'var unused = 1; eval("x");' > lcars-reference-files/assets/lcars.js
+lint_expect 0 "a clean React project passes, the vendored script unlinted"

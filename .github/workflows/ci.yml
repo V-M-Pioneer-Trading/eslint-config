@@ -20,6 +20,8 @@ jobs:
       # is a movable pointer in someone else's repository. The comment records
       # which release the SHA was, so a bump is a visible diff.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -32,9 +34,24 @@ jobs:
 
       - run: npm run typecheck
 
+      # The package's own source, linted with its own base config.
+      - run: npm run lint
+
       # Lints test/fixtures/ with the real configs and asserts which rule
       # fires where, so a preset or rule lost upstream fails here.
       - run: npm test
+
+      # The peer range is `typescript >=5.7.0 <6.1.0`; the lockfile tests 5.9.
+      # Its two ends run here too, in this job, so the required check stays
+      # the single `test`.
+      - name: Test against the ends of the typescript peer range
+        run: |
+          for version in 5.7 6.0; do
+            npm install --no-save --ignore-scripts "typescript@$version" > /dev/null
+            echo "typescript $(node -p "require('typescript').version")"
+            npm test
+          done
+          npm ci --ignore-scripts > /dev/null
 
       - name: Pack and check the tarball's contents
         run: |
