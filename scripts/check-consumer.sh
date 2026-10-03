@@ -26,7 +26,7 @@ extract() {
 cd "$work"
 npm init -y > /dev/null
 npm install --save-dev --ignore-scripts --no-audit --no-fund \
-  "$tarball" "eslint@^9.39.0" "typescript-eslint@^8.71.0" "typescript@~5.9.0" > /dev/null
+  "$tarball" "eslint@^10.12.0" "typescript-eslint@^8.71.0" "typescript@~5.9.0" > /dev/null
 node -e '
   const l = require("./package-lock.json");
   const p = l.packages["node_modules/@v-m-pioneer-trading/eslint-config"];

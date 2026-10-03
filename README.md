@@ -7,7 +7,8 @@ generated paths to skip. They never add, remove or reconfigure a rule.
 Changing a rule is a release of this package plus a version bump in each
 repository.
 
-ESLint 9 flat config, ESM, Node >= 20.11. Distributed exactly like
+ESLint 10 flat config, ESM, Node `^20.19 || ^22.13 || >=24` (ESLint 10's own
+range). Distributed exactly like
 [clerk-client][clerk]: a `v*` tag attaches the tarball to a GitHub Release,
 consumers install that URL and their `package-lock.json` pins its integrity.
 No registry, no token, no git at install time.
@@ -17,7 +18,7 @@ No registry, no token, no git at install time.
 ```sh
 npm install --save-dev \
   https://github.com/V-M-Pioneer-Trading/eslint-config/releases/download/v1.0.0/v-m-pioneer-trading-eslint-config-1.0.0.tgz \
-  eslint@^9.39.0 typescript-eslint@^8.71.0
+  eslint@^10.12.0 typescript-eslint@^8.71.0
 ```
 
 `typescript` is already a dev dependency of every consumer (`>=5.7 <6.1`).
@@ -121,7 +122,7 @@ const first = values[0]!;
 
 | Package | Kind | Version | Why this kind |
 |---|---|---|---|
-| `eslint` | peer | `^9.39.0` | the consumer runs it; one copy per tree |
+| `eslint` | peer | `^10.12.0` | the consumer runs it; one copy per tree |
 | `typescript-eslint` | peer | `^8.71.0` | parser and plugin must be the copy ESLint loads the consumer's TypeScript with |
 | `typescript` | peer | `>=5.7.0 <6.1.0` | the consumer's compiler; typescript-eslint 8's supported range |
 | `@eslint-community/eslint-plugin-eslint-comments` | dependency | `4.8.1` exact | a rule set, not a tool: the config release decides its version |

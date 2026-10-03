@@ -1,7 +1,7 @@
 {
   "name": "@v-m-pioneer-trading/eslint-config",
   "version": "1.0.0",
-  "description": "Shared ESLint 9 flat config for V-M-Pioneer-Trading TypeScript repositories: typescript-eslint strictTypeChecked + stylisticTypeChecked, eslint-comments, and a React variant.",
+  "description": "Shared ESLint 10 flat config for V-M-Pioneer-Trading TypeScript repositories: typescript-eslint strictTypeChecked + stylisticTypeChecked, eslint-comments, and a React variant.",
   "license": "MIT",
   "author": "Max Radomskyi",
   "repository": {
@@ -31,7 +31,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20.11"
+    "node": "^20.19.0 || ^22.13.0 || >=24"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -43,13 +43,13 @@
     "eslint-plugin-react-refresh": "0.5.7"
   },
   "peerDependencies": {
-    "eslint": "^9.39.0",
+    "eslint": "^10.12.0",
     "typescript": ">=5.7.0 <6.1.0",
     "typescript-eslint": "^8.71.0"
   },
   "devDependencies": {
     "@types/node": "22.20.5",
-    "eslint": "9.39.5",
+    "eslint": "10.12.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.71.0"
   }
