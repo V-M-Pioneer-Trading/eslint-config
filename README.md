@@ -17,7 +17,7 @@ No registry, no token, no git at install time.
 
 ```sh
 npm install --save-dev \
-  https://github.com/V-M-Pioneer-Trading/eslint-config/releases/download/v1.0.0/v-m-pioneer-trading-eslint-config-1.0.0.tgz \
+  https://github.com/V-M-Pioneer-Trading/eslint-config/releases/download/v1.1.0/v-m-pioneer-trading-eslint-config-1.1.0.tgz \
   eslint@^10.12.0 typescript-eslint@^8.71.0
 ```
 
@@ -120,6 +120,7 @@ be linted.
 |---|---|---|
 | `strictTypeChecked` | typescript-eslint 8 ([list][strict]) — `recommended` plus the strict rules, all type-aware ones included: `no-floating-promises`, `no-misused-promises`, `no-unsafe-*`, `no-unnecessary-condition`, `restrict-template-expressions`, `no-unused-vars`, … | everything linted |
 | `stylisticTypeChecked` | typescript-eslint 8 ([list][stylistic]) — `prefer-nullish-coalescing`, `prefer-optional-chain`, `consistent-type-definitions`, `array-type`, `dot-notation`, … Consistency rules only; **no formatting** (no Prettier, no whitespace rules) | everything linted |
+| `no-unused-vars` option | typescript-eslint, `error` with `argsIgnorePattern: "^_"` and `caughtErrorsIgnorePattern: "^_"` — `_next` in an Express error handler (which Express recognises by its four arguments) and `catch (_e)` are not reported. A parameter or caught error without the underscore still is, as are unused variables (`varsIgnorePattern` and `destructuredArrayIgnorePattern` are not set: `_x` as a variable is dead code, and `const [, b] = pair` already skips an element) | everything linted |
 | `consistent-type-imports` | typescript-eslint, `error` — a type-only import is `import type`. Added here: neither preset has it, and meta#105 counted on it | everything linted |
 | eslint-comments `recommended` | [@eslint-community/eslint-plugin-eslint-comments][comments]: `disable-enable-pair`, `no-aggregating-enable`, `no-duplicate-disable`, `no-unlimited-disable`, `no-unused-enable` | everything linted |
 | `require-description` | same plugin, `error` — every directive says why after ` -- ` | everything linted |
@@ -218,7 +219,8 @@ npm ci --ignore-scripts && npm run typecheck && npm test
 
 `npm test` lints the projects in `test/fixtures/` with the real configs and
 asserts which rule fires in which file, one fixture per rule set:
-`no-floating-promises`, `no-unused-vars`, `no-unsafe-*`,
+`no-floating-promises`, `no-unused-vars` (and its `_` exemptions: an Express
+`_next` and `catch (_e)` pass, the same without the underscore is reported), `no-unsafe-*`,
 `consistent-type-imports`, `array-type` and `prefer-nullish-coalescing`
 (stylistic), `no-unnecessary-condition` (in strict, not in recommended),
 `require-description` on a bare disable (and nothing on a described one),

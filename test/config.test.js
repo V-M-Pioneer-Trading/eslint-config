@@ -77,6 +77,24 @@ void describe("base", () => {
     assert.ok(rulesIn(await linted, "src/unused.ts").includes("@typescript-eslint/no-unused-vars"));
   });
 
+  void it("ignores _-prefixed parameters and caught errors (Express arity stubs)", async () => {
+    assert.deepEqual(rulesIn(await linted, "src/underscore-ignored.ts"), []);
+  });
+
+  void it("still reports the same unused parameter and caught error without the underscore", async () => {
+    // `req` is before the used `res`, so after-used lets it through; `next`
+    // (last, unused) and the caught `e` are reported.
+    const result = (await eslint.lintFiles(["src/unused-arg.ts"]))[0];
+    assert.ok(result);
+    assert.deepEqual(
+      result.messages.map((m) => `${m.ruleId ?? "?"}: ${m.message}`),
+      [
+        "@typescript-eslint/no-unused-vars: 'next' is defined but never used. Allowed unused args must match /^_/u.",
+        "@typescript-eslint/no-unused-vars: 'e' is defined but never used. Allowed unused caught errors must match /^_/u.",
+      ],
+    );
+  });
+
   void it("reports an any flowing out of JSON.parse (no-unsafe-*)", async () => {
     const rules = rulesIn(await linted, "src/unsafe.ts");
     assert.ok(rules.includes("@typescript-eslint/no-unsafe-assignment"));
@@ -184,8 +202,10 @@ void describe("base", () => {
       "src/strict-only.ts",
       "src/stylistic.ts",
       "src/type-import.ts",
+      "src/underscore-ignored.ts",
       "src/unlimited-disable.ts",
       "src/unsafe.ts",
+      "src/unused-arg.ts",
       "src/unused-disable.ts",
       "src/unused-inline-config.ts",
       "src/unused.ts",

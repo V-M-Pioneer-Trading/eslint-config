@@ -119,6 +119,22 @@ export function base(options) {
       },
     },
     {
+      name: "@v-m-pioneer-trading/unused-vars",
+      rules: {
+        // `_`-prefixed parameters and caught errors are unused on purpose:
+        // an Express error handler is recognised by its four-argument arity,
+        // so `_next` must be declared. Deliberately NOT varsIgnorePattern (an
+        // unused `_x` variable is dead code, and nothing needs it) nor
+        // destructuredArrayIgnorePattern (`const [, b] = pair` already skips
+        // an element). The preset's defaults are restated because options
+        // given here replace the preset's.
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          { args: "after-used", argsIgnorePattern: "^_", caughtErrors: "all", caughtErrorsIgnorePattern: "^_" },
+        ],
+      },
+    },
+    {
       name: "@v-m-pioneer-trading/type-information",
       files,
       languageOptions: {
