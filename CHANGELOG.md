@@ -1,6 +1,19 @@
 # Changelog
 
-## 1.0.0 (unreleased)
+## 1.1.0
+
+- `@typescript-eslint/no-unused-vars` ignores parameters and caught errors
+  named `^_` (`argsIgnorePattern`, `caughtErrorsIgnorePattern`), so an
+  Express error handler's `_next` arity stub and `catch (_e)` need no
+  `eslint-disable` (#4). Everything else is as before: the other options keep
+  the preset's defaults, an unused parameter or caught error without the
+  underscore is still reported, and `varsIgnorePattern` and
+  `destructuredArrayIgnorePattern` are deliberately not set.
+- Minor, not patch: removing the now-needless disables in a consumer is
+  required, because `reportUnusedDisableDirectives` is `"error"` and an
+  `eslint-disable` that no longer suppresses anything fails lint.
+
+## 1.0.0 (2026-10-03)
 
 First release (V-M-Pioneer-Trading/meta#105). ESLint 10 flat config
 (`eslint` peer `^10.12.0`; ESLint 9 is end-of-life), typescript-eslint 8,
