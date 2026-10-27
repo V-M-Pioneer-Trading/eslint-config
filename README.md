@@ -47,7 +47,7 @@ In CI, `npm run lint` is a step in the existing test job, after `npm ci`
 
 ### React (command-interface)
 
-command-interface is converted to TypeScript before it adopts this (meta#105,
+command-interface is TypeScript and uses this variant at 1.1.0 (meta#105,
 Q28 = B); there is no JavaScript variant. `lcars-reference-files/` is vendored
 (jQuery, `lcars.js`) and is never linted.
 

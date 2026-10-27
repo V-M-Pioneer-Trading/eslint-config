@@ -14,3 +14,7 @@
 - Consumers add no rules and no inline `/* eslint */` config; only disable directives with a reason. `reportUnusedDisableDirectives` is an error.
 - `ignores` option adds paths only; a negated pattern is refused.
 - `.claude/worktrees/` is not in `DEFAULT_IGNORES`: `eslint .` in a consumer lints task worktrees.
+
+## Reference docs
+
+- `README.md` "Rule sets", consumer and release sections: read before changing a rule, cutting a release, or bumping a consumer.
