@@ -1,8 +1,0 @@
-{
-  "enabled": false,
-  "allow_paths": [],
-  "deny_paths": [],
-  "require_checks": true,
-  "require_validation": true,
-  "merge_method": "squash"
-}
