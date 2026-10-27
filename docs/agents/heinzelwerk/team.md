@@ -10,8 +10,10 @@ How heinzelwerk agents work in this repo. Mode rules (single repo vs workspace) 
   2. `npm run typecheck --silent`
   3. `npm run lint --silent`
   4. `npm test --silent`
-  5. `scripts/check-consumer.sh` (lints a scratch consumer against the packed tarball)
-- **Security**: gitleaks pre-commit hook (`gitleaks git --pre-commit --staged` in `.git/hooks/pre-commit`, so every worktree runs it) · dependency audit in checks
+  5. TypeScript peer-range ends: `for v in 5.7 6.0; do npm install --no-save --ignore-scripts typescript@$v >/dev/null && npm test --silent; done; npm ci --ignore-scripts >/dev/null`
+  6. `npm pack --silent >/dev/null && tar -tzf ./*.tgz | sort` lists exactly `package/LICENSE`, `README.md`, `index.js`, `package.json`, `react.js`
+  7. `bash scripts/check-consumer.sh ./*.tgz` (lints a scratch consumer against the packed tarball; needs check 6's tarball)
+- **Security**: no secret scan runs yet: gitleaks is not installed and no pre-commit hook exists (planned: `gitleaks git --pre-commit --staged` in `.git/hooks/pre-commit`), so check every diff for secrets by eye · dependency audit in checks
 - **Coding standards**: `README.md` (consumer rules, release rules)
 - **Risk areas** (validator reviews diffs touching these on Opus):
   - any rule change: every consumer's lint changes on its next bump; a stricter rule is a minor or major release, never a patch
