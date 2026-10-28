@@ -93,6 +93,7 @@ disabled:
 
 - fleet-service: `scripts/write-openapi.js` becomes `.cjs`; update the
   `openapi` script in `package.json`.
+  Correction (2026-10-29): already done, `scripts/write-openapi.cjs` exists and the `openapi` script uses it, see ../fleet-service/scripts/write-openapi.cjs and ../fleet-service/package.json:13.
 - agent-service `ts/`: the four scripts that use `require()`
   (`check-dependencies.js`, `codegen.js`, `run-contract.js`,
   `write-openapi.js`) become `.cjs`. Update every caller: the `package.json`
@@ -100,6 +101,7 @@ disabled:
   `run-contract.js`). `src/__tests__/dependencies.test.ts` and
   `src/__tests__/runContract.test.ts` call `require()` from TypeScript, which
   the rule reports too: they switch to `import`.
+  Correction (2026-10-29): `ts/` is gone and the four scripts are already `.cjs`, see ../agent-service/scripts/{check-dependencies,codegen,run-contract,write-openapi}.cjs.
 
 ### Ignored everywhere
 
@@ -200,6 +202,8 @@ must learn about this one, which lives in **`devDependencies`**:
   clerk-client release;
 - the `registry.npmjs.org/<name>/-/` check, which a release URL can never
   satisfy.
+
+Correction (2026-10-29): agent-service has no `ts/` directory; its allowlist script is `scripts/check-dependencies.cjs`, see ../agent-service/scripts/check-dependencies.cjs.
 
 ## Bumping a repository
 
