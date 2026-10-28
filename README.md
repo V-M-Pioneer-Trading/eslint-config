@@ -51,6 +51,8 @@ command-interface is converted to TypeScript before it adopts this (meta#105,
 Q28 = B); there is no JavaScript variant. `lcars-reference-files/` is vendored
 (jQuery, `lcars.js`) and is never linted.
 
+Correction (2026-10-28): command-interface is already TypeScript and has adopted eslint-config v1.1.0, see command-interface/package.json:25.
+
 ```js
 // eslint.config.mjs (React)
 import { react } from "@v-m-pioneer-trading/eslint-config/react";
@@ -93,6 +95,8 @@ disabled:
 
 - fleet-service: `scripts/write-openapi.js` becomes `.cjs`; update the
   `openapi` script in `package.json`.
+
+  Correction (2026-10-28): fleet-service's script is already write-openapi.cjs and the openapi script calls it, see fleet-service/package.json:13.
 - agent-service `ts/`: the four scripts that use `require()`
   (`check-dependencies.js`, `codegen.js`, `run-contract.js`,
   `write-openapi.js`) become `.cjs`. Update every caller: the `package.json`
@@ -100,6 +104,8 @@ disabled:
   `run-contract.js`). `src/__tests__/dependencies.test.ts` and
   `src/__tests__/runContract.test.ts` call `require()` from TypeScript, which
   the rule reports too: they switch to `import`.
+
+  Correction (2026-10-28): agent-service's TS code lives at the repo root and its require() scripts are already .cjs under scripts/, see agent-service/scripts/check-dependencies.cjs.
 
 ### Ignored everywhere
 
@@ -200,6 +206,8 @@ must learn about this one, which lives in **`devDependencies`**:
   clerk-client release;
 - the `registry.npmjs.org/<name>/-/` check, which a release URL can never
   satisfy.
+
+Correction (2026-10-28): auth-service (ported) already has @v-m-pioneer-trading/eslint-config v1.1.0 in devDependencies (auth-service/package.json:32); agent-service's TS code lives at the repo root, its scripts are already .cjs (agent-service/scripts/check-dependencies.cjs), and its dependency check already admits the eslint-config release tarball in devDependencies, see agent-service/scripts/check-dependencies.cjs:37.
 
 ## Bumping a repository
 
