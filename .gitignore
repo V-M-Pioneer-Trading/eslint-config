@@ -3,3 +3,6 @@
 *.tgz
 *.log
 .DS_Store
+
+# heinzelwerk task worktrees
+.claude/worktrees/
