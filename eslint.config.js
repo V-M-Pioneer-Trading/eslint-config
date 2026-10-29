@@ -5,7 +5,7 @@ import { base } from "./index.js";
 export default base({
   tsconfigRootDir: import.meta.dirname,
   files: ["index.js", "react.js", "test/*.js"],
-  // Deliberately full of violations: they are what the tests assert.
   // .claude/worktrees/ holds agent task worktrees: full checkouts of this repo, linted in their own run.
+  // test/fixtures/ is deliberately full of violations: they are what the tests assert.
   ignores: ["test/fixtures/", ".claude/worktrees/"],
 });

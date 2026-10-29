@@ -13,13 +13,13 @@ How heinzelwerk agents work in this repo. Mode rules (single repo vs workspace) 
   - `for version in 5.7 6.0; do npm install --no-save --ignore-scripts "typescript@$version" > /dev/null && npm test || exit 1; done; npm ci --ignore-scripts > /dev/null`
   - `.github/workflows/ci.yml` step "Pack and check the tarball's contents" (:56-68), run as written
   - `bash scripts/check-consumer.sh ./*.tgz`
-  - `npm audit --audit-level=high (red on main: V-M-Pioneer-Trading/meta#136)`
+  - `npm audit --audit-level=high (red on main: V-M-Pioneer-Trading/meta#136; not in CI)`
 - **Verified against**: 4006cff 2026-10-29 (checks and every ref in this file; retro bumps it)
 - **Coding standards**: the package lints itself with its own `base` config (`eslint.config.js:5`); `npm run lint` is `eslint . --max-warnings 0` (`package.json:39`).
 - **Risk areas** (validator reviews diffs touching these on Opus). Each entry is a path/glob or a described kind of change, plus why it is risky:
   - `index.js`, `react.js`: every consumer's lint changes on the next bump. A new reportable rule is a minor bump (`CHANGELOG.md:12-14`); a rule that starts reporting forces consumers to remove disables, because `reportUnusedDisableDirectives` is `"error"` (`index.js:102`).
   - `package.json` `version`, `exports`, `files`, `peerDependencies`: the tag must equal `version` (`.github/workflows/release.yml:38-40`); `files` and `exports` decide what consumers can import (`package.json:22-32`); peers pin eslint, typescript, typescript-eslint ranges (`package.json:47-49`).
-  - `.github/workflows/release.yml`: a `v*` tag push releases (:10); `contents: write` lives on the one publish job (:22); a half-succeeded `gh release create` blocks re-runs until the release is deleted (`README.md:273-276`).
+  - `.github/workflows/release.yml`: a `v*` tag push releases (:13-14); `contents: write` lives on the one publish job (:79); a half-succeeded `gh release create` blocks re-runs until the release is deleted (`README.md:273-276`).
   - `README.md` snippets: `scripts/check-consumer.sh` extracts and runs the `// eslint.config.mjs` blocks (:23-31, :58, :90); an edit can break CI. `lcars-reference-files/` must stay in the React snippet's `ignores` (`README.md:62`).
   - `scripts/check-consumer.sh`: the pre-release proof against a real consumer; installs unlocked eslint/typescript-eslint (:35-36) and needs network.
   - Hardcoded `v1.1.0` strings in `README.md:20`, `README.md:215`, `README.md:261-262`: move with each release.

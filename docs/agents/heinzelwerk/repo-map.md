@@ -13,7 +13,7 @@ Verified against 4006cff 2026-10-29.
 - Shipped files: index.js, react.js, README.md, LICENSE (+ package.json). `package.json:27-32`
 - `scripts/check-consumer.sh`: pre-release proof against a scratch consumer. `scripts/check-consumer.sh:1`
 - `test/config.test.js` with `test/fixtures/{base,react}`; run by `node --test`. `package.json:38`
-- Docs: `README.md`, `CHANGELOG.md`, `LICENSE`. No `docs/` besides `docs/agents/heinzelwerk/`, no CLAUDE.md.
+- Docs: `README.md`, `CHANGELOG.md`, `LICENSE`. No `docs/` besides `docs/agents/heinzelwerk/`; CLAUDE.md is added by this branch (heinzelwerk block only).
 
 ## Rules in base
 - tseslint strictTypeChecked + stylisticTypeChecked. `index.js:110-111`
@@ -35,7 +35,7 @@ Verified against 4006cff 2026-10-29.
 ## Build / run
 - `npm ci --ignore-scripts`, `npm run typecheck` (tsc, JSDoc-checked JS), `npm run lint` (`--max-warnings 0`), `npm test` (`node --test test/config.test.js`). `package.json:36-40`
 - Engines `^20.19.0 || ^22.13.0 || >=24`. `package.json:34`
-- Self-lint: own `base`, ignores `test/fixtures/`. `eslint.config.js:5-10`
+- Self-lint: own `base`, ignores `test/fixtures/` and the .claude/worktrees/ task-worktree folder. `eslint.config.js:5-10`
 - Peers: eslint ^10.12.0, typescript >=5.7.0 <6.1.0, typescript-eslint ^8.71.0. `package.json:47-49`
 - Name the consumer config `eslint.config.mjs` so it is ESM whatever the repo's `"type"`. `README.md:29-30`
 - Lockfile `package-lock.json`; line endings forced LF. `.github/workflows/ci.yml:33` runs `npm ci`; `.gitattributes:1`
@@ -47,9 +47,9 @@ Verified against 4006cff 2026-10-29.
 - It installs eslint, typescript-eslint, typescript@~5.9 unlocked: needs network. `scripts/check-consumer.sh:35-36`
 
 ## Release (`.github/workflows/release.yml`)
-- Trigger: tag `v*`. `.github/workflows/release.yml:10`
+- Trigger: tag `v*`. `.github/workflows/release.yml:13-14`
 - Job build (read-only token): tag == `package.json` version check, `npm ci --ignore-scripts`, typecheck, lint, test, `npm pack`, `check-consumer.sh`, artifact retention 1 day. `.github/workflows/release.yml:38-71`
-- Job publish (only `contents: write`, runs no npm): tag commit must be on main, tarball holds exactly 5 files each `cmp`-identical to the tag, then `gh release create --generate-notes`. `.github/workflows/release.yml:22`, `.github/workflows/release.yml:84-92`, `.github/workflows/release.yml:121`, `.github/workflows/release.yml:132`
+- Job publish (only `contents: write`, runs no npm): tag commit must be on main, tarball holds exactly 5 files each `cmp`-identical to the tag, then `gh release create --generate-notes`. `.github/workflows/release.yml:79`, `.github/workflows/release.yml:84-92`, `.github/workflows/release.yml:121`, `.github/workflows/release.yml:132`
 - Manual procedure and recovery. `README.md:259-269`, `README.md:271-276`
 
 ## Traps
