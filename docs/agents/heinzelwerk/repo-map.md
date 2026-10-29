@@ -13,7 +13,7 @@ Verified against 4006cff 2026-10-29.
 - Shipped files: index.js, react.js, README.md, LICENSE (+ package.json). `package.json:27-32`
 - `scripts/check-consumer.sh`: pre-release proof against a scratch consumer. `scripts/check-consumer.sh:1`
 - `test/config.test.js` with `test/fixtures/{base,react}`; run by `node --test`. `package.json:38`
-- Docs: `README.md`, `CHANGELOG.md`, `LICENSE`. No `docs/` besides `docs/agents/heinzelwerk/`; CLAUDE.md is added by this branch (heinzelwerk block only).
+- Docs: `README.md`, `CHANGELOG.md`, `LICENSE`, `CLAUDE.md`; nothing else outside `docs/agents/`. (verified 2026-10-29: `git ls-files '*.md' ':!docs/agents'` → CHANGELOG.md, CLAUDE.md, README.md)
 
 ## Rules in base
 - tseslint strictTypeChecked + stylisticTypeChecked. `index.js:110-111`
@@ -29,7 +29,11 @@ Verified against 4006cff 2026-10-29.
 ## Calls / called-by
 - Called by (release URL pin in devDependencies): agent-service, auth-service, automation-service, fleet-service, st-gateway, ts-introspection-client (base); command-interface (react). `../agent-service/package.json:34`, `../auth-service/package.json:32`, `../automation-service/package.json:31`, `../fleet-service/package.json:32`, `../st-gateway/package.json:26`, `../ts-introspection-client/package.json:35`, `../command-interface/package.json:25`, `../command-interface/eslint.config.mjs:1`
 - Consumer CI runs `npm run lint`: `../agent-service/.github/workflows/container.yml:86`, `../auth-service/.github/workflows/container.yml:88`, `../automation-service/.github/workflows/container.yml:75`, `../fleet-service/.github/workflows/container.yml:73`, `../st-gateway/.github/workflows/container.yml:69`, `../ts-introspection-client/.github/workflows/ci.yml:37`, `../command-interface/.github/workflows/deploy.yml:78`
-- Not used (no reference found): navigation-service, ai-service, spacetraders-mcp-server, meta, infrastructure. (unverified)
+- Not used by navigation-service. (verified 2026-10-29 @ 72459f3: `git grep -il eslint-config origin/main -- . ':!*.md'` → no match)
+- Not used by ai-service. (verified 2026-10-29 @ 0377480: `git grep -il eslint-config origin/main -- . ':!*.md'` → no match)
+- Not used by spacetraders-mcp-server. (verified 2026-10-29 @ 2310229: `git grep -il eslint-config origin/main -- . ':!*.md'` → no match)
+- Not used by meta. (verified 2026-10-29 @ cd0b1eb: `git grep -il eslint-config origin/main -- . ':!*.md'` → no match)
+- Not used by infrastructure. (verified 2026-10-29 @ 71ccde2: `git grep -il eslint-config origin/main -- . ':!*.md'` → no match)
 - Calls nothing at runtime: dependencies are lint plugins only (`package.json:41-45`)
 
 ## Build / run

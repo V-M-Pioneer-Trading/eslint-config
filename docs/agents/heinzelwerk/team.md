@@ -35,4 +35,4 @@ How heinzelwerk agents work in this repo. Mode rules (single repo vs workspace) 
     - `../command-interface/package.json:25` (react, `../command-interface/eslint.config.mjs:1`)
   - A release needs a bump PR in every consumer: `npm install --save-dev <new release URL>`, commit `package.json` and `package-lock.json` together (`README.md:210-218`).
   - Consumed: none.
-  - Not consumers: navigation-service, ai-service, spacetraders-mcp-server, meta, infrastructure (no reference found).
+  - Not consumers: navigation-service, ai-service, spacetraders-mcp-server, meta, infrastructure; one grep per repo in `docs/agents/heinzelwerk/repo-map.md` under "Calls / called-by".

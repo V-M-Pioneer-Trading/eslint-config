@@ -51,7 +51,7 @@ command-interface is converted to TypeScript before it adopts this (meta#105,
 Q28 = B); there is no JavaScript variant. `lcars-reference-files/` is vendored
 (jQuery, `lcars.js`) and is never linted.
 
-Correction (2026-10-29): command-interface is converted to TypeScript and already consumes the React variant, see command-interface/eslint.config.mjs:1.
+Correction (2026-10-29): command-interface is converted to TypeScript and already consumes the React variant, see V-M-Pioneer-Trading/command-interface eslint.config.mjs:3.
 
 ```js
 // eslint.config.mjs (React)
@@ -103,7 +103,7 @@ disabled:
   `src/__tests__/runContract.test.ts` call `require()` from TypeScript, which
   the rule reports too: they switch to `import`.
 
-Correction (2026-10-29): the renames are done and callers updated: fleet-service `openapi` script runs `scripts/write-openapi.cjs`, agent-service has no `ts/` (its four scripts live in `scripts/*.cjs`), and those two tests contain no `require()`, see fleet-service/package.json:13, agent-service/scripts/run-contract.cjs:1, agent-service/src/__tests__/dependencies.test.ts:1.
+Correction (2026-10-29): the renames are done and callers updated: fleet-service's `openapi` script runs the `.cjs` file, agent-service has no `ts/` (its scripts live in `scripts/*.cjs`), and its two tests `import` them instead of calling `require()`, see V-M-Pioneer-Trading/fleet-service package.json:13, V-M-Pioneer-Trading/agent-service package.json:15, V-M-Pioneer-Trading/agent-service src/__tests__/dependencies.test.ts:4, V-M-Pioneer-Trading/agent-service src/__tests__/runContract.test.ts:5.
 
 ### Ignored everywhere
 
@@ -205,7 +205,7 @@ must learn about this one, which lives in **`devDependencies`**:
 - the `registry.npmjs.org/<name>/-/` check, which a release URL can never
   satisfy.
 
-Correction (2026-10-29): agent-service and auth-service allowlists already admit eslint-config in `devDependencies`, see agent-service/scripts/check-dependencies.cjs:35-51, auth-service/scripts/check-dependencies.cjs:24-29.
+Correction (2026-10-29): agent-service's allowlist is scripts/check-dependencies.cjs (there is no `ts/` directory), and it and auth-service's allowlist already admit eslint-config in `devDependencies`, see V-M-Pioneer-Trading/agent-service scripts/check-dependencies.cjs:45-46, V-M-Pioneer-Trading/auth-service scripts/check-dependencies.cjs:27-28.
 
 ## Bumping a repository
 
