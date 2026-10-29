@@ -30,6 +30,7 @@ TypeScript `>=5.7.0 <6.1.0` (both ends tested in CI).
 - `react`: `base` + eslint-plugin-react-hooks 7 `recommended` +
   eslint-plugin-react-refresh `vite`. TypeScript only: command-interface is
   converted before it adopts this.
+  Correction (2026-10-29): command-interface is converted and already consumes the React variant, see command-interface/eslint.config.mjs:1.
 - Release: a read-only `build` job and a `publish` job that runs no npm,
   refuses a tag not on `main`, and takes the tarball by the tag's name only
   if it holds exactly the five files, each byte-identical to the tag.

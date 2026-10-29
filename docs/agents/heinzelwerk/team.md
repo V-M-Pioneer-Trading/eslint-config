@@ -19,10 +19,10 @@ How heinzelwerk agents work in this repo. Mode rules (single repo vs workspace) 
 - **Risk areas** (validator reviews diffs touching these on Opus). Each entry is a path/glob or a described kind of change, plus why it is risky:
   - `index.js`, `react.js`: every consumer's lint changes on the next bump. A new reportable rule is a minor bump (`CHANGELOG.md:12-14`); a rule that starts reporting forces consumers to remove disables, because `reportUnusedDisableDirectives` is `"error"` (`index.js:102`).
   - `package.json` `version`, `exports`, `files`, `peerDependencies`: the tag must equal `version` (`.github/workflows/release.yml:38-40`); `files` and `exports` decide what consumers can import (`package.json:22-32`); peers pin eslint, typescript, typescript-eslint ranges (`package.json:47-49`).
-  - `.github/workflows/release.yml`: a `v*` tag push releases (:10); `contents: write` lives on the one publish job (:22); a half-succeeded `gh release create` blocks re-runs until the release is deleted (`README.md:267-270`).
-  - `README.md` snippets: `scripts/check-consumer.sh` extracts and runs the `// eslint.config.mjs` blocks (:23-31, :58, :90); an edit can break CI. `lcars-reference-files/` must stay in the React snippet's `ignores` (`README.md:60`).
+  - `.github/workflows/release.yml`: a `v*` tag push releases (:10); `contents: write` lives on the one publish job (:22); a half-succeeded `gh release create` blocks re-runs until the release is deleted (`README.md:273-276`).
+  - `README.md` snippets: `scripts/check-consumer.sh` extracts and runs the `// eslint.config.mjs` blocks (:23-31, :58, :90); an edit can break CI. `lcars-reference-files/` must stay in the React snippet's `ignores` (`README.md:62`).
   - `scripts/check-consumer.sh`: the pre-release proof against a real consumer; installs unlocked eslint/typescript-eslint (:35-36) and needs network.
-  - Hardcoded `v1.1.0` strings in `README.md:20`, `README.md:209`, `README.md:255-256`: move with each release.
+  - Hardcoded `v1.1.0` strings in `README.md:20`, `README.md:215`, `README.md:261-262`: move with each release.
   - `.github/workflows/ci.yml`: the 5-file tarball check (:56-68) and the typescript 5.7/6.0 matrix (:47-54).
 - **Contracts** (see team-modes **Contract changes**; validator checks every diff touching these):
   - Provided: the public API `.` -> `index.js` (`base`, `TYPESCRIPT_FILES`, `JAVASCRIPT_FILES`, `DEFAULT_IGNORES`) and "./react" -> `react.js` (`react`) (`package.json:22-26`, `index.js:88`, `react.js:20`) · consumers and pins (release URL v1.1.0 in devDependencies):
@@ -33,6 +33,6 @@ How heinzelwerk agents work in this repo. Mode rules (single repo vs workspace) 
     - `../st-gateway/package.json:26`
     - `../ts-introspection-client/package.json:35` (base)
     - `../command-interface/package.json:25` (react, `../command-interface/eslint.config.mjs:1`)
-  - A release needs a bump PR in every consumer: `npm install --save-dev <new release URL>`, commit `package.json` and `package-lock.json` together (`README.md:204-212`).
+  - A release needs a bump PR in every consumer: `npm install --save-dev <new release URL>`, commit `package.json` and `package-lock.json` together (`README.md:210-218`).
   - Consumed: none.
   - Not consumers: navigation-service, ai-service, spacetraders-mcp-server, meta, infrastructure (no reference found).

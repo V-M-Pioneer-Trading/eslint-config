@@ -37,6 +37,7 @@ Verified against 4006cff 2026-10-29.
 - Engines `^20.19.0 || ^22.13.0 || >=24`. `package.json:34`
 - Self-lint: own `base`, ignores `test/fixtures/`. `eslint.config.js:5-10`
 - Peers: eslint ^10.12.0, typescript >=5.7.0 <6.1.0, typescript-eslint ^8.71.0. `package.json:47-49`
+- Name the consumer config `eslint.config.mjs` so it is ESM whatever the repo's `"type"`. `README.md:29-30`
 - Lockfile `package-lock.json`; line endings forced LF. `.github/workflows/ci.yml:33` runs `npm ci`; `.gitattributes:1`
 
 ## CI (`.github/workflows/ci.yml`, job `test`)
@@ -49,16 +50,16 @@ Verified against 4006cff 2026-10-29.
 - Trigger: tag `v*`. `.github/workflows/release.yml:10`
 - Job build (read-only token): tag == `package.json` version check, `npm ci --ignore-scripts`, typecheck, lint, test, `npm pack`, `check-consumer.sh`, artifact retention 1 day. `.github/workflows/release.yml:38-71`
 - Job publish (only `contents: write`, runs no npm): tag commit must be on main, tarball holds exactly 5 files each `cmp`-identical to the tag, then `gh release create --generate-notes`. `.github/workflows/release.yml:22`, `.github/workflows/release.yml:84-92`, `.github/workflows/release.yml:121`, `.github/workflows/release.yml:132`
-- Manual procedure and recovery. `README.md:253-263`, `README.md:265-270`
+- Manual procedure and recovery. `README.md:259-269`, `README.md:271-276`
 
 ## Traps
-- `v1.1.0` is hardcoded in `README.md:20`, `README.md:209`, example tag `README.md:255-256`.
-- Bump = `npm install --save-dev <new url>` in each of 7 consumers, commit `package.json` + lock together. `README.md:204-212`
+- `v1.1.0` is hardcoded in `README.md:20`, `README.md:215`, example tag `README.md:261-262`.
+- Bump = `npm install --save-dev <new url>` in each of 7 consumers, commit `package.json` + lock together. `README.md:210-218`
 - New reportable rule = minor bump; consumers must then remove now-unused disables. `CHANGELOG.md:12-14`
 - `../agent-service/scripts/check-dependencies.cjs:36-48` admits eslint-config only by lock path + release-URL regex; renaming the repo or tarball breaks it.
-- `README.md:193` cites a stale path "ts/scripts/check-dependencies.js".
-- Half-succeeded `gh release create` blocks re-runs until the release is deleted. `README.md:267-270`
+- `README.md:197` cites a stale path "ts/scripts/check-dependencies.js".
+- Half-succeeded `gh release create` blocks re-runs until the release is deleted. `README.md:273-276`
 - Artifact lives 1 day: after that re-run all jobs. `.github/workflows/release.yml:71`
 - A README edit can break CI (snippets are executed). `scripts/check-consumer.sh:23-31`
-- `lcars-reference-files/` (vendored in command-interface) must stay in the React snippet's `ignores`. `scripts/check-consumer.sh:127-129`, `README.md:60`
+- `lcars-reference-files/` (vendored in command-interface) must stay in the React snippet's `ignores`. `scripts/check-consumer.sh:127-129`, `README.md:62`
 - Lint needs tsoa output first in agent-service and fleet-service. `../agent-service/.github/workflows/container.yml:83-86`, `../fleet-service/README.md:116`

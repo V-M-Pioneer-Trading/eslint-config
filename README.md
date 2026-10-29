@@ -51,6 +51,8 @@ command-interface is converted to TypeScript before it adopts this (meta#105,
 Q28 = B); there is no JavaScript variant. `lcars-reference-files/` is vendored
 (jQuery, `lcars.js`) and is never linted.
 
+Correction (2026-10-29): command-interface is converted to TypeScript and already consumes the React variant, see command-interface/eslint.config.mjs:1.
+
 ```js
 // eslint.config.mjs (React)
 import { react } from "@v-m-pioneer-trading/eslint-config/react";
@@ -100,6 +102,8 @@ disabled:
   `run-contract.js`). `src/__tests__/dependencies.test.ts` and
   `src/__tests__/runContract.test.ts` call `require()` from TypeScript, which
   the rule reports too: they switch to `import`.
+
+Correction (2026-10-29): the renames are done and callers updated: fleet-service `openapi` script runs `scripts/write-openapi.cjs`, agent-service has no `ts/` (its four scripts live in `scripts/*.cjs`), and those two tests contain no `require()`, see fleet-service/package.json:13, agent-service/scripts/run-contract.cjs:1, agent-service/src/__tests__/dependencies.test.ts:1.
 
 ### Ignored everywhere
 
@@ -200,6 +204,8 @@ must learn about this one, which lives in **`devDependencies`**:
   clerk-client release;
 - the `registry.npmjs.org/<name>/-/` check, which a release URL can never
   satisfy.
+
+Correction (2026-10-29): agent-service and auth-service allowlists already admit eslint-config in `devDependencies`, see agent-service/scripts/check-dependencies.cjs:35-51, auth-service/scripts/check-dependencies.cjs:24-29.
 
 ## Bumping a repository
 
