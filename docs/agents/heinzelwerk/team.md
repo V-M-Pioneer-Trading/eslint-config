@@ -6,7 +6,7 @@ How heinzelwerk agents work in this repo. Mode rules (single repo vs workspace) 
 - **Role**: shared library, no Backend/Frontend paths. Shared ESLint 10 flat config; distributed as GitHub Release tarballs (`package.json:2`).
 - **Shared paths** (only the owner named in the task edits them): whole repo; consumers listed under Contracts.
 - **Worktree setup** (run once in every new task worktree): `npm ci --ignore-scripts`
-- **Checks** (validator runs every one, in order; copied from CI, quiet flags only):
+- **Checks** (validator runs every one, in order; copied from CI, quiet flags only; a status note goes after the closing backtick, never inside the span, which must run as pasted):
   - `npm run typecheck`
   - `npm run lint`
   - `npm test`
