@@ -6,12 +6,12 @@ How heinzelwerk agents work in this repo. Mode rules (single repo vs workspace) 
 - **Role**: shared library, no Backend/Frontend paths. Shared ESLint 10 flat config; distributed as GitHub Release tarballs (`package.json:2`).
 - **Shared paths** (only the owner named in the task edits them): whole repo; consumers listed under Contracts.
 - **Worktree setup** (run once in every new task worktree): `npm ci --ignore-scripts`
-- **Checks** (validator runs every one, in order; copied from CI, quiet flags only; a status note goes after the closing backtick, never inside the span, which must run as pasted):
+- **Checks** (validator runs every one, in order; copied from CI except where marked `not in CI`, quiet flags only; a status note goes after the closing backtick, never inside the span, which must run as pasted):
   - `npm run typecheck`
   - `npm run lint`
   - `npm test`
   - `for version in 5.7 6.0; do npm install --no-save --ignore-scripts "typescript@$version" > /dev/null && npm test || exit 1; done; npm ci --ignore-scripts > /dev/null`
-  - `.github/workflows/ci.yml` step "Pack and check the tarball's contents" (:56-68), run as written
+  - `rm -f ./*.tgz`, then `.github/workflows/ci.yml` step "Pack and check the tarball's contents" (:56-68), run as written (CI's fresh checkout has no tarball; a stale one from an earlier pack makes `ls ./*.tgz` match two)
   - `bash scripts/check-consumer.sh ./*.tgz`
   - `npm audit --audit-level=high` (red on main: V-M-Pioneer-Trading/meta#136; not in CI)
 - **Verified against**: 4006cff 2026-10-29 (checks and every ref in this file; retro bumps it)
