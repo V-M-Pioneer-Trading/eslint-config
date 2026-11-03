@@ -47,11 +47,9 @@ In CI, `npm run lint` is a step in the existing test job, after `npm ci`
 
 ### React (command-interface)
 
-command-interface is converted to TypeScript before it adopts this (meta#105,
+command-interface was converted to TypeScript before it adopted this (meta#105,
 Q28 = B); there is no JavaScript variant. `lcars-reference-files/` is vendored
 (jQuery, `lcars.js`) and is never linted.
-
-Correction (2026-10-29): command-interface is converted to TypeScript and already consumes the React variant, see V-M-Pioneer-Trading/command-interface eslint.config.mjs:3.
 
 ```js
 // eslint.config.mjs (React)
@@ -93,17 +91,15 @@ every `require()`, except in a `.cjs` file, whose extension already says it
 imports that way. So a script written with `require()` is renamed, not
 disabled:
 
-- fleet-service: `scripts/write-openapi.js` becomes `.cjs`; update the
-  `openapi` script in `package.json`.
-- agent-service `ts/`: the four scripts that use `require()`
+- fleet-service: `scripts/write-openapi.js` became `.cjs`, and the
+  `openapi` script in `package.json` runs it.
+- agent-service: the four scripts that use `require()`
   (`check-dependencies.js`, `codegen.js`, `run-contract.js`,
-  `write-openapi.js`) become `.cjs`. Update every caller: the `package.json`
-  scripts, `.github/workflows/ts.yml` and `CLAUDE.md` (both name
-  `run-contract.js`). `src/__tests__/dependencies.test.ts` and
-  `src/__tests__/runContract.test.ts` call `require()` from TypeScript, which
-  the rule reports too: they switch to `import`.
-
-Correction (2026-10-29): the renames are done and callers updated: fleet-service's `openapi` script runs the `.cjs` file, agent-service has no `ts/` (its scripts live in `scripts/*.cjs`), and its two tests `import` them instead of calling `require()`, see V-M-Pioneer-Trading/fleet-service package.json:13, V-M-Pioneer-Trading/agent-service package.json:15, V-M-Pioneer-Trading/agent-service src/__tests__/dependencies.test.ts:4, V-M-Pioneer-Trading/agent-service src/__tests__/runContract.test.ts:5.
+  `write-openapi.js`) became `scripts/*.cjs`. Every caller was updated: the `package.json`
+  scripts, `.github/workflows/container.yml` and `CLAUDE.md` (both name
+  `run-contract.cjs`). `src/__tests__/dependencies.test.ts` and
+  `src/__tests__/runContract.test.ts` called `require()` from TypeScript, which
+  the rule reports too: they `import` instead.
 
 ### Ignored everywhere
 
@@ -190,22 +186,20 @@ Every consumer's lockfile carries the React plugins, and react-hooks 7 brings
 registry.npmjs.org, with sha512 integrity, and none of it has an install
 script that `npm ci --ignore-scripts` would need.
 
-**Consumers with a dependency allowlist** (agent-service `ts/`, auth-service
-after its port) add three names to `[devDependencies]`:
+**Consumers with a dependency allowlist** (agent-service, auth-service) list
+three names in `[devDependencies]`:
 `@v-m-pioneer-trading/eslint-config`, `eslint`, `typescript-eslint`. The
 transitive plugins are not direct dependencies and do not appear in
-`package.json`. agent-service's `ts/scripts/check-dependencies.js` was written
+`package.json`. agent-service's `scripts/check-dependencies.cjs` was written
 for exactly one tarball, clerk-client's, in `dependencies`. Three of its checks
-must learn about this one, which lives in **`devDependencies`**:
+have learned about this one, which lives in **`devDependencies`**:
 
-- the spec check, which requires a plain semver range for everything except
+- the spec check, which required a plain semver range for everything except
   the clerk-client URL;
-- the resolved-origin check, which admits only registry.npmjs.org and the
+- the resolved-origin check, which admitted only registry.npmjs.org and the
   clerk-client release;
 - the `registry.npmjs.org/<name>/-/` check, which a release URL can never
   satisfy.
-
-Correction (2026-10-29): agent-service's allowlist is scripts/check-dependencies.cjs (there is no `ts/` directory), and it and auth-service's allowlist already admit eslint-config in `devDependencies`, see V-M-Pioneer-Trading/agent-service scripts/check-dependencies.cjs:45-46, V-M-Pioneer-Trading/auth-service scripts/check-dependencies.cjs:27-28.
 
 ## Bumping a repository
 

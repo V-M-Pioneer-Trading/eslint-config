@@ -54,16 +54,15 @@ Verified against 4006cff 2026-10-29.
 - Trigger: tag `v*`. `.github/workflows/release.yml:13-14`
 - Job build (read-only token): tag == `package.json` version check, `npm ci --ignore-scripts`, typecheck, lint, test, `npm pack`, `check-consumer.sh`, artifact retention 1 day. `.github/workflows/release.yml:38-71`
 - Job publish (only `contents: write`, runs no npm): tag commit must be on main, tarball holds exactly 5 files each `cmp`-identical to the tag, then `gh release create --generate-notes`. `.github/workflows/release.yml:79`, `.github/workflows/release.yml:84-92`, `.github/workflows/release.yml:121`, `.github/workflows/release.yml:132`
-- Manual procedure and recovery. `README.md:259-269`, `README.md:271-276`
+- Manual procedure and recovery. `README.md:253-263`, `README.md:265-270`
 
 ## Traps
-- `v1.1.0` is hardcoded in `README.md:20`, `README.md:215`, example tag `README.md:261-262`.
-- Bump = `npm install --save-dev <new url>` in each of 7 consumers, commit `package.json` + lock together. `README.md:210-218`
+- `v1.1.0` is hardcoded in `README.md:20`, `README.md:209`, example tag `README.md:255-256`.
+- Bump = `npm install --save-dev <new url>` in each of 7 consumers, commit `package.json` + lock together. `README.md:204-212`
 - New reportable rule = minor bump; consumers must then remove now-unused disables. `CHANGELOG.md:12-14`
 - `../agent-service/scripts/check-dependencies.cjs:36-48` admits eslint-config only by lock path + release-URL regex; renaming the repo or tarball breaks it.
-- `README.md:197` cites a stale path "ts/scripts/check-dependencies.js".
-- Half-succeeded `gh release create` blocks re-runs until the release is deleted. `README.md:273-276`
+- Half-succeeded `gh release create` blocks re-runs until the release is deleted. `README.md:267-270`
 - Artifact lives 1 day: after that re-run all jobs. `.github/workflows/release.yml:71`
 - A README edit can break CI (snippets are executed). `scripts/check-consumer.sh:23-31`
-- `lcars-reference-files/` (vendored in command-interface) must stay in the React snippet's `ignores`. `scripts/check-consumer.sh:127-129`, `README.md:62`
+- `lcars-reference-files/` (vendored in command-interface) must stay in the React snippet's `ignores`. `scripts/check-consumer.sh:127-129`, `README.md:60`
 - Lint needs tsoa output first in agent-service and fleet-service. `../agent-service/.github/workflows/container.yml:83-86`, `../fleet-service/README.md:116`
