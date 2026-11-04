@@ -13,7 +13,7 @@ Verified against 4006cff 2026-10-29.
 - Shipped files: index.js, react.js, README.md, LICENSE (+ package.json). `package.json:27-32`
 - `scripts/check-consumer.sh`: pre-release proof against a scratch consumer. `scripts/check-consumer.sh:1`
 - `test/config.test.js` with `test/fixtures/{base,react}`; run by `node --test`. `package.json:38`
-- Docs: `README.md`, `CHANGELOG.md`, `LICENSE`, `CLAUDE.md`; nothing else outside `docs/agents/`. (verified 2026-10-29: `git ls-files '*.md' ':!docs/agents'` → CHANGELOG.md, CLAUDE.md, README.md)
+- Docs: `README.md`, `CHANGELOG.md`, `LICENSE`, `CLAUDE.md`; nothing else outside `docs/agents/`. (verified 2026-10-29 at 4006cff: `git ls-files '*.md' ':!docs/agents'` → CHANGELOG.md, README.md; `CLAUDE.md` is added by this pull request)
 
 ## Rules in base
 - tseslint strictTypeChecked + stylisticTypeChecked. `index.js:110-111`
